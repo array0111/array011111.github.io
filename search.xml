@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>youdiancms_9.2.6 后台rce</title>
+      <link href="2021/05/17/2021-5-17-youdiancms-rce-9-2-6/"/>
+      <url>2021/05/17/2021-5-17-youdiancms-rce-9-2-6/</url>
+      
+        <content type="html"><![CDATA[<p>youdiancms最新版9.2.6的一个后台RCE，白盒审计出来的。交CNVD被归档了，尬住。那就简单剖析一下漏洞。</p><span id="more"></span><h4 id="挖掘流程"><a href="#挖掘流程" class="headerlink" title="挖掘流程"></a>挖掘流程</h4><p>官网下载最新版源码，对<code>file_get_contents、eval、exec、file_put_contents.....</code>等危险函数进行全局搜索，在</p><p><code>/Users/sw0r3d/src/youdiancms9.2.6/App/Lib/Action/Admin/DecorationAction.class.php</code>找到了一处能直接控制函数参数的地方</p><img src="https://i.loli.net/2021/05/19/ken6sO7wWaXDYtg.png" alt="image-20210517182352983" style="zoom: 33%;" /><p><code>saveCode</code>方法实现了一个保存代码的功能，用<code>file_put_contents</code>写入POST传入的<code>Content</code>内容，中间用stripslashes做了一次转义反斜线的的去除。接着把自定义的代码写入已有的code.html文件中。也就是我们能写入任意代码，看一下这个类实现的功能。</p><img src="https://i.loli.net/2021/05/19/437LOlEWdoAstUK.png" alt="image-20210517183327872" style="zoom: 33%;" /><p>注释说明是模版装修功能，index方法会自动加载<code>saveCode</code>方法。接着搭建环境来测试一下模版装修功能。</p><p>在管理员登录后，模版装修处</p><img src="https://i.loli.net/2021/05/19/Vo7I6D8kq3rEizx.png" alt="image-20210517175300728" style="zoom:50%;" /><p>由于index会直接触发<code>saveCode</code>方法，我们直接post传参<code>Content</code>即可RCE</p><img src="https://i.loli.net/2021/05/19/qvSNbY1EXwPIZhz.png" alt="image-20210517183933999" style="zoom: 33%;" /><p>老实说这个漏洞还是比较鸡肋，需要结合登录绕过才行。</p><h4 id="后续-5-17"><a href="#后续-5-17" class="headerlink" title="后续-5.17"></a>后续-5.17</h4><p>由于这个漏洞在写这篇文章的前两天被公开了，尝试google了一下这个漏洞作者是否公开细节，最后找到了篇转载的文章</p><p><a href="http://www.hackdig.com/05/hack-354081.htm">http://www.hackdig.com/05/hack-354081.htm</a></p><p>思路大概是绕过session判断登录后台，然后进行模版getshell。不过貌似被修复了。</p><img src="https://i.loli.net/2021/05/19/ijsLBCP7WGT5d19.png" alt="image-20210519104635664" style="zoom:33%;" /><p>作者重新写了个<code>verify</code>函数来代替之前的验证码生成函数<code>verifyCode</code>，导致我们不能控制session名称。卒</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Hello World</title>
+      <link href="2021/05/17/hello-world/"/>
+      <url>2021/05/17/hello-world/</url>
+      
+        <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+  
+  
+</search>
